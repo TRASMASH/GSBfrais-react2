@@ -31,6 +31,7 @@ export default function Login() {
           <div>
             <label>Login :</label>
             <input type="text"
+
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               required
@@ -50,6 +51,7 @@ export default function Login() {
           <button type="submit">
             Se connecter
           </button>
+
         </form>
       </div>
     </div>
