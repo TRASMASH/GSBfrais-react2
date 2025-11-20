@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import fraisData from "../data/frais.json";
 import "./FraisTable.css";
+import axios from "axios";  
 
 export default function FraisTable() {
   const [fraisList, setFraisList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Etats de filtrage / recherche
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filterNonNull, setFilterNonNull] = useState(true); // checkbox : afficher seulement montantvalide != null
   const [minMontant, setMinMontant] = useState(""); // valeur minimale pour montant validé (chaîne pour input)
 
   useEffect(() => {
-    // simulate API delay 500 ms
+    
     const timer = setTimeout(() => {
       setFraisList(fraisData);
       setLoading(false);
@@ -26,20 +27,20 @@ export default function FraisTable() {
   const hasMinMontant = !Number.isNaN(minMontantNum);
 
   const filteredFrais = (fraisList || [])
-    // applique le filtre "monant validé non null" seulement si filterNonNull est true
+    
     .filter((f) => {
       if (!filterNonNull) return true;
       return f?.montantvalide != null;
     })
-    // filtre de recherche + filtre montant minimal
+   
     .filter((f) => {
-      // normalisation / protections
+     
       const anneemois = f?.anneemois ? String(f.anneemois).toLowerCase() : "";
       const idVisiteur = f?.id_visiteur != null ? String(f.id_visiteur).toLowerCase() : "";
       const idFrais = f?.id_frais != null ? String(f.id_frais).toLowerCase() : "";
       const montantValide = f?.montantvalide != null ? String(f.montantvalide).toLowerCase() : "";
 
-      // si recherche vide, on ne filtre pas sur texte
+    
       const matchesTerm =
         !term ||
         anneemois.includes(term) ||
@@ -47,7 +48,7 @@ export default function FraisTable() {
         idFrais.includes(term) ||
         montantValide.includes(term);
 
-      // si utilisateur a saisi un montant minimal, vérifier
+     
       const matchesMinMontant = !hasMinMontant || (f?.montantvalide != null && Number(f.montantvalide) >= minMontantNum);
 
       return matchesTerm && matchesMinMontant;

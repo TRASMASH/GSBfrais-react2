@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
     setToken(data.access_token);
     return data;
   };
+  
 
   const logoutUser = () => {
     logout();
