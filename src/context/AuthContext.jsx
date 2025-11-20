@@ -1,50 +1,35 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { signIn } from '../services/authService';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { signIn, logout, getCurrentUser, getAuthToken } from '../services/authService';
 
-export const AuthContext = createContext({
-  user: null,
-  token: null,
-  loading: false,
-  loginUser: async () => {},
-});
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Exemple : restaurer token/user depuis localStorage au montage (optionnel)
   useEffect(() => {
-    const storedToken = localStorage.getItem('auth_token');
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedToken) {
-      setToken(storedToken);
+    const savedUser = getCurrentUser();
+    const savedToken = getAuthToken();
+
+    if (savedUser && savedToken) {
+      setUser(savedUser);
+      setToken(savedToken);
     }
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        setUser(null);
-      }
-    }
+    setLoading(false);
   }, []);
 
   const loginUser = async (login, password) => {
-    setLoading(true);
-    try {
-      const data = await signIn(login, password);
-      // data attendu : { visiteur: {...}, access_token: '...' }
-      setUser(data.visiteur ?? null);
-      setToken(data.access_token ?? null);
+    const data = await signIn(login, password);
+    setUser(data.visiteur);
+    setToken(data.access_token);
+    return data;
+  };
 
-      // optionnel : persister en localStorage
-      if (data.access_token) localStorage.setItem('auth_token', data.access_token);
-      if (data.visiteur) localStorage.setItem('auth_user', JSON.stringify(data.visiteur));
-
-      return data;
-    } finally {
-      setLoading(false);
-    }
+  const logoutUser = () => {
+    logout();
+    setUser(null);
+    setToken(null);
   };
 
   const value = {
@@ -52,7 +37,10 @@ export function AuthProvider({ children }) {
     token,
     loading,
     loginUser,
+    logoutUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+export const useAuth = () => useContext(AuthContext);

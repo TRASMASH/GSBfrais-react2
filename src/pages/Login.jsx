@@ -6,22 +6,19 @@ import "../styles/Login.css";
 export default function Login() {
   
   const { loginUser } = useAuth();
-
-  // Hook pour rediriger
   const navigate = useNavigate();
-
   
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    
-    if (loginUser(login, password)) {
+    try {
+      await loginUser(login, password);
       navigate('/dashboard'); 
-    } else {
-      alert('Identifiants incorrects');
+    } catch (error) {
+      alert('Echec de la connexion');
     }
   };
 
