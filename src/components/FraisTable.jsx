@@ -1,56 +1,60 @@
 import React, { useState, useEffect } from "react";
-import fraisData from "../data/frais.json";
 import "./FraisTable.css";
-import axios from "axios";  
+import axios from "axios";
+import { useAuth } from "../context/AuthContext"; 
+import { API_URL } from "../services/authService"; 
+import { useNavigate } from 'react-router-dom';
 
 export default function FraisTable() {
+  const { user, token } = useAuth(); 
+  
+  
+  const navigate = useNavigate(); 
+  
   const [fraisList, setFraisList] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterNonNull, setFilterNonNull] = useState(true); // checkbox : afficher seulement montantvalide != null
-  const [minMontant, setMinMontant] = useState(""); // valeur minimale pour montant validé (chaîne pour input)
+  const [filterNonNull, setFilterNonNull] = useState(true); 
+  const [minMontant, setMinMontant] = useState(""); 
 
   useEffect(() => {
-    
-    const timer = setTimeout(() => {
-      setFraisList(fraisData);
-      setLoading(false);
-    }, 500);
+    if (!user || !token) return;
+    const fetchFrais = async () => {
+      try {
+        const response = await axios.get(`${API_URL}frais/liste/${user.id_visiteur}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFraisList(response.data);
+        setLoading(false); 
+      } catch (error) {
+        console.error("Erreur lors de la récupération des frais:", error);
+        setLoading(false);
+      }
+    };
+    fetchFrais(); 
+  }, [user, token]); 
 
-    return () => clearTimeout(timer);
-  }, []);
-
+  
   const term = (searchTerm || "").trim().toLowerCase();
   const minMontantNum = parseFloat(minMontant);
   const hasMinMontant = !Number.isNaN(minMontantNum);
 
-  const filteredFrais = (fraisList || [])
-    
-    .filter((f) => {
+  const filteredFrais = (fraisList || []).filter((f) => {
+      
       if (!filterNonNull) return true;
       return f?.montantvalide != null;
     })
-   
     .filter((f) => {
-     
+      
       const anneemois = f?.anneemois ? String(f.anneemois).toLowerCase() : "";
       const idVisiteur = f?.id_visiteur != null ? String(f.id_visiteur).toLowerCase() : "";
       const idFrais = f?.id_frais != null ? String(f.id_frais).toLowerCase() : "";
       const montantValide = f?.montantvalide != null ? String(f.montantvalide).toLowerCase() : "";
 
-    
-      const matchesTerm =
-        !term ||
-        anneemois.includes(term) ||
-        idVisiteur.includes(term) ||
-        idFrais.includes(term) ||
-        montantValide.includes(term);
-
-     
+      const matchesTerm = !term || anneemois.includes(term) || idVisiteur.includes(term) || idFrais.includes(term) || montantValide.includes(term);
       const matchesMinMontant = !hasMinMontant || (f?.montantvalide != null && Number(f.montantvalide) >= minMontantNum);
-
       return matchesTerm && matchesMinMontant;
     });
 
@@ -58,41 +62,11 @@ export default function FraisTable() {
 
   return (
     <div className="frais-table-container">
-      <h2>Liste des frais</h2>
+      <h2>Liste des Frais</h2>
 
-      {/* Filtres : case à cocher, champ montant min, champ recherche */}
+     
       <div className="filter-controls" style={{ marginBottom: 12, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <input
-            type="checkbox"
-            checked={filterNonNull}
-            onChange={(e) => setFilterNonNull(e.target.checked)}
-          />
-          <span>Afficher seulement les frais avec montant validé</span>
-        </label>
-
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span>Montant min :</span>
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Ex: 100"
-            value={minMontant}
-            onChange={(e) => setMinMontant(e.target.value)}
-            style={{ width: 120 }}
-          />
-        </label>
-
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <input
-            type="text"
-            placeholder="Rechercher par année-mois, ID visiteur, ID frais ou montant..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-            style={{ width: "100%" }}
-          />
-        </div>
+        
       </div>
 
       <table className="frais-table">
@@ -100,12 +74,15 @@ export default function FraisTable() {
           <tr>
             <th>ID</th>
             <th>ID État</th>
+            
+             
             <th>Année-Mois</th>
             <th>ID Visiteur</th>
             <th>Justificatifs</th>
             <th>Date modification</th>
-            <th>Montant saisi</th>
+            <th>Montant saisi</th> 
             <th>Montant validé</th>
+            <th>Actions</th>
           </tr>
         </thead>
 
@@ -114,12 +91,24 @@ export default function FraisTable() {
             <tr key={frais.id_frais}>
               <td>{frais.id_frais}</td>
               <td>{frais.id_etat}</td>
+              
+              
+             
+              
               <td>{frais.anneemois}</td>
               <td>{frais.id_visiteur}</td>
               <td>{frais.nbjustificatifs}</td>
               <td>{frais.datemodification}</td>
-              <td>{/* montant saisi calculé plus tard */}</td>
+              <td>{frais.montantsaisi != null ? `${frais.montantsaisi} €` : "€"}</td>
               <td>{frais.montantvalide != null ? `${frais.montantvalide} €` : "€"}</td>
+             <td> 
+                <button 
+                    onClick={() => navigate(`/frais/modifier/${frais.id_frais}`)} 
+                    className="edit-button" 
+                > 
+                    Modifier 
+                </button> 
+              </td>
             </tr>
           ))}
         </tbody>

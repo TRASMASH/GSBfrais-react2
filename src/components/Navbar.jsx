@@ -9,25 +9,28 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-links" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
 
-        {/* Liens à gauche */}
+        
         <div>
           <Link to="/" className="navbar-link">Accueil</Link>
 
-          {/* Afficher Tableau de bord seulement si connecté */}
+          
           {user && (
             <Link to="/dashboard" className="navbar-link">Tableau de bord</Link>
           )}
+          {user && (
+            <Link to="/frais/ajouter" className="navbar-link">Ajouter Frais</Link>
+          )}
         </div>
 
-        {/* Liens à droite */}
+        
         <div>
-          {/* Si user connecté → bouton Déconnexion */}
+         
           {user ? (
             <button onClick={logoutUser} className="navbar-link logout-btn">
               Déconnexion
             </button>
           ) : (
-            /* Sinon → lien Connexion */
+           
             <Link to="/login" className="navbar-link">Connexion</Link>
           )}
         </div>

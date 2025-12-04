@@ -5,7 +5,13 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
+.edit-button { 
+  background-color: #ffc107; margin-right: 5px; 
+} 
+.edit-button:hover 
+{
+   background-color: #e0a800; 
+}
 .frais-table {
   width: 100%;
   border-collapse: collapse;
