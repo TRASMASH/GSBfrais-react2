@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_URL, getCurrentUser } from '../services/authService';
 import './FraisForm.css';
 
-// On accepte la prop "frais" (qui vaut null par défaut si on est en mode ajout)
+
 const FraisForm = ({ frais = null }) => {
     const [idFrais, setIdFrais] = useState(null);
     const [anneeMois, setAnneeMois] = useState("");
@@ -15,13 +15,13 @@ const FraisForm = ({ frais = null }) => {
 
     const navigate = useNavigate();
 
-    // Pré-remplir le formulaire si on modifie un frais existant (Déclenché quand la prop 'frais' change)
+    
     useEffect(() => {
         if (frais) {
             setIdFrais(frais.id_frais);
             setAnneeMois(frais.anneemois || "");
             setNbJustificatifs(frais.nbjustificatifs || "");
-            // On utilise montantvalide pour la modification, sinon chaîne vide
+          
             setMontant(frais.montantvalide || "");
         }
     }, [frais]);

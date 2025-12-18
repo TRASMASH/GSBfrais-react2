@@ -27,7 +27,7 @@
   background-color: #f5f5f5;
 }
 
-/* Style bouton Modifier */
+
 .edit-button { 
   background-color: #ffc107; 
   margin-right: 5px; 
@@ -41,7 +41,7 @@
    background-color: #e0a800; 
 }
 
-/* --- AJOUT : Style bouton Supprimer --- */
+
 .delete-button {
   background-color: #dc3545;
   padding: 6px 12px;

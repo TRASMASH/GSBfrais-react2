@@ -12,7 +12,7 @@ export default function FraisTable() {
   const [fraisList, setFraisList] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // États pour les filtres (optionnel selon votre avancement, je laisse votre code)
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filterNonNull, setFilterNonNull] = useState(true); 
   const [minMontant, setMinMontant] = useState(""); 
@@ -34,18 +34,18 @@ export default function FraisTable() {
     fetchFrais(); 
   }, [user, token]); 
 
-  // --- NOUVEAU : Fonction de suppression ---
+  
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce frais ?')) return;
 
     try {
-        // La méthode DELETE avec un body nécessite la propriété "data" dans axios
+       
         await axios.delete(`${API_URL}frais/suppr`, {
             data: { id_frais: id },
             headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Mise à jour locale de la liste pour retirer l'élément supprimé
+       
         setFraisList(fraisList.filter((frais) => frais.id_frais !== id));
         
     } catch (error) {
@@ -79,7 +79,7 @@ export default function FraisTable() {
     <div className="frais-table-container">
       <h2>Liste des Frais</h2>
       
-      {/* (Vos filtres ici si vous voulez les garder) */}
+      
 
       <table className="frais-table">
         <thead>
@@ -114,7 +114,7 @@ export default function FraisTable() {
                 > 
                     Modifier 
                 </button> 
-                {/* --- NOUVEAU : Bouton Supprimer --- */}
+            
                 <button 
                     onClick={() => handleDelete(frais.id_frais)} 
                     className="delete-button"
