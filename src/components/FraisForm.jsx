@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { API_URL, getCurrentUser } from '../services/authService';
-import './FraisForm.css'; // 1. Import du fichier CSS
+import './FraisForm.css';
 
-const FraisForm = () => {
+// On accepte la prop "frais" (qui vaut null par défaut si on est en mode ajout)
+const FraisForm = ({ frais = null }) => {
     const [idFrais, setIdFrais] = useState(null);
     const [anneeMois, setAnneeMois] = useState("");
     const [nbJustificatifs, setNbJustificatifs] = useState("");
@@ -13,6 +14,17 @@ const FraisForm = () => {
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
+
+    // Pré-remplir le formulaire si on modifie un frais existant (Déclenché quand la prop 'frais' change)
+    useEffect(() => {
+        if (frais) {
+            setIdFrais(frais.id_frais);
+            setAnneeMois(frais.anneemois || "");
+            setNbJustificatifs(frais.nbjustificatifs || "");
+            // On utilise montantvalide pour la modification, sinon chaîne vide
+            setMontant(frais.montantvalide || "");
+        }
+    }, [frais]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,18 +37,37 @@ const FraisForm = () => {
                 throw new Error("Token introuvable, vous devez être connecté.");
             }
 
+            
             const fraisData = {
                 anneemois: anneeMois,
-                nbjustificatifs: parseInt(nbJustificatifs, 10),
-                id_visiteur: getCurrentUser()["id_visiteur"]
-                
+                nbjustificatifs: parseInt(nbJustificatifs, 10)
             };
 
-            const response = await axios.post(`${API_URL}frais/ajout`, fraisData, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            });
+            let response;
+
+            if (frais) {
+               
+                fraisData["id_frais"] = idFrais;
+                fraisData["montantvalide"] = parseFloat(montant);
+               
+               
+                fraisData["id_visiteur"] = frais.id_visiteur;
+                fraisData["id_etat"] = frais.id_etat;
+
+                response = await axios.post(`${API_URL}frais/modif`, fraisData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+            } else {
+                
+                fraisData["id_visiteur"] = getCurrentUser()["id_visiteur"];
+                
+               
+
+                response = await axios.post(`${API_URL}frais/ajout`, fraisData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
 
             console.log("Réponse API:", response);
             navigate('/dashboard');
@@ -55,7 +86,8 @@ const FraisForm = () => {
 
     return (
         <div className="frais-form-container">
-            <h3>Ajouter une note de frais</h3>
+           
+            <h3>{frais ? 'Modifier le frais' : 'Saisir un frais'}</h3>
             
             {error && <div className="error-message">{error}</div>}
 
@@ -84,8 +116,9 @@ const FraisForm = () => {
                     />
                 </div>
 
+                
                 <div className="form-group">
-                    <label htmlFor="montant">Montant validé :</label>
+                    <label htmlFor="montant">Montant (en €) :</label>
                     <input
                         type="number"
                         id="montant"
@@ -93,12 +126,12 @@ const FraisForm = () => {
                         className="form-input"
                         value={montant}
                         onChange={(e) => setMontant(e.target.value)}
-                        required
+                        
                     />
                 </div>
 
                 <button type="submit" className="btn-submit" disabled={loading}>
-                    {loading ? 'Enregistrement...' : 'Ajouter'}
+                    {loading ? 'Enregistrement...' : (frais ? 'Mettre à jour' : 'Ajouter')}
                 </button>
             </form>
         </div>

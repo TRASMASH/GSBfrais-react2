@@ -52,3 +52,16 @@ test('rafraichir', async ({ page }) => {
   await expect(page).toHaveURL('http://localhost:3000/dashboard');
 });
 
+test('Logout', async ({ page }) => {
+  await page.goto('http://localhost:3000/login');
+
+  await page.fill('input[name="login"]', 'Andre');
+  await page.fill('input[name="password"]', 'secret');
+  await page.click('button[type="submit"]');
+  
+
+  await expect(page).toHaveURL('http://localhost:3000/dashboard');
+
+  await page.click('button.logout-btn');
+  await expect(page).toHaveURL('http://localhost:3000/login');
+});
