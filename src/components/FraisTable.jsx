@@ -13,9 +13,7 @@ export default function FraisTable() {
   const [loading, setLoading] = useState(true);
   
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterNonNull, setFilterNonNull] = useState(true); 
-  const [minMontant, setMinMontant] = useState(""); 
+  const [filterNonNull, setFilterNonNull] = useState(false); 
 
   useEffect(() => {
     if (!user || !token) return;
@@ -25,61 +23,58 @@ export default function FraisTable() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFraisList(response.data);
-        setLoading(false); 
       } catch (error) {
         console.error("Erreur lors de la récupération des frais:", error);
-        setLoading(false);
+      } finally {
+        setLoading(false); 
       }
     };
     fetchFrais(); 
   }, [user, token]); 
 
-  
+
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce frais ?')) return;
 
     try {
-       
         await axios.delete(`${API_URL}frais/suppr`, {
             data: { id_frais: id },
             headers: { Authorization: `Bearer ${token}` }
         });
-
-       
         setFraisList(fraisList.filter((frais) => frais.id_frais !== id));
-        
     } catch (error) {
         console.error('Erreur lors de la suppression:', error);
         alert("Erreur lors de la suppression du frais.");
     }
   };
 
-  const term = (searchTerm || "").trim().toLowerCase();
-  const minMontantNum = parseFloat(minMontant);
-  const hasMinMontant = !Number.isNaN(minMontantNum);
-
   const filteredFrais = (fraisList || []).filter((f) => {
-      if (!filterNonNull) return true;
-      return f?.montantvalide != null;
-    })
-    .filter((f) => {
-      const anneemois = f?.anneemois ? String(f.anneemois).toLowerCase() : "";
-      const idVisiteur = f?.id_visiteur != null ? String(f.id_visiteur).toLowerCase() : "";
-      const idFrais = f?.id_frais != null ? String(f.id_frais).toLowerCase() : "";
-      const montantValide = f?.montantvalide != null ? String(f.montantvalide).toLowerCase() : "";
-
-      const matchesTerm = !term || anneemois.includes(term) || idVisiteur.includes(term) || idFrais.includes(term) || montantValide.includes(term);
-      const matchesMinMontant = !hasMinMontant || (f?.montantvalide != null && Number(f.montantvalide) >= minMontantNum);
-      return matchesTerm && matchesMinMontant;
-    });
+     
+      if (filterNonNull) {
+          return f.montantvalide !== null;
+      }
+     
+      return true;
+  });
 
   if (loading) return <div><b>Chargement des frais ...</b></div>;
 
   return (
     <div className="frais-table-container">
       <h2>Liste des Frais</h2>
+
       
-      
+      <div className="filter-container">
+        <label>
+          <input
+            type="checkbox"
+            checked={filterNonNull}
+            onChange={() => setFilterNonNull(!filterNonNull)}
+          />
+          Afficher uniquement les montants validés
+        </label>
+      </div>
+   
 
       <table className="frais-table">
         <thead>
@@ -106,7 +101,7 @@ export default function FraisTable() {
               <td>{frais.nbjustificatifs}</td>
               <td>{frais.datemodification}</td>
               <td>{frais.montantsaisi != null ? `${frais.montantsaisi} €` : "€"}</td>
-              <td>{frais.montantvalide != null ? `${frais.montantvalide} €` : "€"}</td>
+              <td>{frais.montantvalide != null ? `${frais.montantvalide} €` : "Non validé"}</td>
               <td> 
                 <button 
                     onClick={() => navigate(`/frais/modifier/${frais.id_frais}`)} 
@@ -114,7 +109,6 @@ export default function FraisTable() {
                 > 
                     Modifier 
                 </button> 
-            
                 <button 
                     onClick={() => handleDelete(frais.id_frais)} 
                     className="delete-button"

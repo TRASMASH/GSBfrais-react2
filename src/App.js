@@ -8,29 +8,45 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import FraisAdd from './pages/FraisAdd';
 import FraisEdit from './components/FraisEdit'; 
+import FraisHorsForfait from './pages/FraisHorsForfait';
+import FraisHorsForfaitAdd from './pages/FraisHorsForfaitAdd';
+import FraisHorsForfaitEdit from './pages/FraisHorsForfaitEdit';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
-
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/frais/ajouter" element={<FraisAdd />} />
-          <Route path="/frais/modifier/:id" element={<FraisEdit />} />
-
           
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
+          
+          <Route 
+            path="/frais/ajouter" 
+            element={<PrivateRoute><FraisAdd /></PrivateRoute>} 
+          />
+          <Route 
+            path="/frais/modifier/:id" 
+            element={<PrivateRoute><FraisEdit /></PrivateRoute>} 
+          />
+          <Route 
+            path="/frais/:id/hors-forfait" 
+            element={<PrivateRoute><FraisHorsForfait /></PrivateRoute>} 
+          />
+          <Route 
+            path="/frais/:id/hors-forfait/ajouter" 
+            element={<PrivateRoute><FraisHorsForfaitAdd /></PrivateRoute>} 
+          />
+          <Route 
+            path="/frais/:id/hors-forfait/modifier/:idHF" 
+            element={<PrivateRoute><FraisHorsForfaitEdit /></PrivateRoute>} 
           />
 
+          <Route
+            path="/dashboard"
+            element={<PrivateRoute><Dashboard /></PrivateRoute>}
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
